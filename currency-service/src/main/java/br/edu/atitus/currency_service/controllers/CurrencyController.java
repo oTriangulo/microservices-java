@@ -20,7 +20,7 @@ public class CurrencyController {
 	private final CurrencyRepository repository;
 	private final CurrencyBCClient currencyBCClient;
 	private final CacheManager cacheManager;
-	
+
 	public CurrencyController(CurrencyRepository repository, CurrencyBCClient currencyBCClient, CacheManager cacheManager) {
 		super();
 		this.repository = repository;
@@ -30,24 +30,25 @@ public class CurrencyController {
 	
 	@Value("${server.port}")
 	private int serverPort;
-
+	
 	@GetMapping("/{value}/{source}/{target}")
 	public ResponseEntity<CurrencyEntity> getCurrency(
 			@PathVariable double value,
 			@PathVariable String source,
 			@PathVariable String target
 			) throws Exception {
-
+		
 		source = source.toUpperCase();
 		target = target.toUpperCase();
 		String dataSource = "None";
+		
 		String nameCache = "Currency";
-		String keyCache = source +  target;
+		String keyCache = source + target;
 		
 		CurrencyEntity currency = cacheManager.getCache(nameCache).get(keyCache, CurrencyEntity.class);
 		
 		if (currency != null) {
-				dataSource = "Cache";
+			dataSource = "Cache";
 		} else {
 			currency = new CurrencyEntity();
 			currency.setSource(source);
@@ -60,14 +61,13 @@ public class CurrencyController {
 					double curTarget = 1;
 					if (!source.equals("BRL")) {
 						CurrencyBCResponse resp = currencyBCClient.getCurrency(source);
-						if (resp.getValue().isEmpty()) throw new Exception("Currency not found for" + source);
+						if (resp.getValue().isEmpty()) throw new Exception("Currency not found for " + source);
 						curSource = resp.getValue().get(0).getCotacaoVenda();
 					}
 					if (!target.equals("BRL")) {
 						CurrencyBCResponse resp = currencyBCClient.getCurrency(target);
-						if (resp.getValue().isEmpty()) throw new Exception ("Currency not found for" + target);
+						if (resp.getValue().isEmpty()) throw new Exception("Currency not found for " + target);
 						curTarget = resp.getValue().get(0).getCotacaoVenda();
-								
 					}
 					currency.setConversionRate(curSource / curTarget);
 					dataSource = "API BCB";
@@ -77,13 +77,15 @@ public class CurrencyController {
 					dataSource = "Local Database";
 				}
 			}
+			
 			cacheManager.getCache(nameCache).put(keyCache, currency);
 		}
 		
 		currency.setConvertedValue(value * currency.getConversionRate());
-		currency.setEnviroment("Currency-Service running on port: " + serverPort + " - DataSource: " + dataSource); 
+		currency.setEnviroment("Currency-service running on port: " + serverPort + " - DataSource: " + dataSource);
 		
 		return ResponseEntity.ok(currency);
+		
 	}
 	
 
