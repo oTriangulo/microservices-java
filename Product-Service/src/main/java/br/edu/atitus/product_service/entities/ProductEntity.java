@@ -1,5 +1,6 @@
 package br.edu.atitus.product_service.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,6 +22,15 @@ public class ProductEntity {
 	private String currency;
 	private Integer stock;
 	
+	@Column(name="image_url")
+	private String imageUrl;
+	
+	public String getImageUrl() {
+		return imageUrl;
+	}
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
 	@Transient
 	private String enviroment;
 	@Transient
