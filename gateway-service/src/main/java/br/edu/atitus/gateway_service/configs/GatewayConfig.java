@@ -39,6 +39,9 @@ public class GatewayConfig {
 			.route(p -> p
 					.path("/ws/orders/**")
 					.uri("lb://order-service"))
+			.route(p -> p
+					.path("/greating-service/**")
+					.uri("lb://greating-service"))
 			.build();
 	}
 	
